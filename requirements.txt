@@ -1,0 +1,28 @@
+# Data
+pandas
+numpy
+openpyxl
+
+# Visulization
+matplotlib
+seaborn
+
+# Machine Learning
+scikit-learn
+statsmodels
+
+# Clustering
+scipy
+
+# NoteBook
+ipykernel
+
+# Utilities
+tqdm
+joblib
+
+# Optional
+yellowbrick
+
+
+
