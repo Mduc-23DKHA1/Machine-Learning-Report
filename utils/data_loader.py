@@ -7,6 +7,11 @@ def load_retail_data():
 
     return pd.read_excel(path)
 
+def load_clean_data():
+    path = PROCESSED_DATA_DIR / "clean_data.csv"
+
+    return pd.read_csv(path)
+
 def load_rfm_data():
     path = PROCESSED_DATA_DIR / "rfm_data.csv"
 
@@ -25,4 +30,4 @@ def load_classification_data():
 def load_timeseries_data():
     path = PROCESSED_DATA_DIR / "timeseries_data.csv"
 
-    return pd.read_csv(path)
+    return pd.read_csv(path, parse_dates=["Date"], index_col="Date").sort_index()

@@ -5,6 +5,7 @@
 # 3/
 # ================
 import pandas as pd
+import numpy as np
 from utils.config import PROCESSED_DATA_DIR
 
 def create_rfm_data(df : pd.DataFrame) -> pd.DataFrame:
@@ -108,19 +109,33 @@ def create_regression_or_classification_data(df : pd.DataFrame, cut_off_date : s
 def create_timeseries_data(df : pd.DataFrame) -> pd.DataFrame:
     """
     Tạo dữ liệu Time Series - Cho dự đoán doanh thu theo tuần
+    !! Dữ liệu có khoảng trống từ 23/12/2010 - 04/01/2011
+    => Ta sẽ làm các bước sau đó nội suy tuyến tính để giữ độ liên tục dữ liệu
     1/ Đưa InvoiceDate làm index
-    2/ Resample dữ liệu theo 'W' (tuần) và tính tổng doanh thu trong tuần
-    3/ Làm gọn tên cột và lưu dữ liệu vào đường dẫn PROCESSED_DATA_DIR / timeseries_data.csv
+    2/ Resample dữ liệu theo 'W' (tuần), từ thứ 2 -> Chủ nhật, và tính tổng doanh thu trong tuần
+    3/ Làm gọn tên cột
+    4/ Kiểm tra dữ liệu đã liên tục chưa (không có giá trị = 0)
+    Nếu có -> chuyển 0 thành Nan và nội suy
+    Nếu không -> giữ nguyên dữ liệu
+    5/ Lưu dữ liệu vào đường dẫn PROCESSED_DATA_DIR / timeseries_data.csv
     """
     df_ts = df.copy()
 
+    df_ts['InvoiceDate'] = pd.to_datetime(df_ts['InvoiceDate'])
     df_ts.set_index('InvoiceDate', inplace=True)
 
-    ts_data = df_ts['Total'].resample('W').sum().reset_index()
+    ts_data = df_ts['Total'].resample('W-MON', closed='left', label='left').sum().reset_index()
+    
     ts_data.rename(columns={
         'InvoiceDate' : 'Date',
         'Total' : 'Weekly_Sales'
     }, inplace=True)
+
+    # ======== Kiểm tra dữ liệu đã liên tục ========
+    if (ts_data['Weekly_Sales'] == 0).any():
+        ts_data['Weekly_Sales'] = ts_data['Weekly_Sales'].replace(0, np.nan)
+        # fill khoảng trống do dữ liệu bị thiếu
+        ts_data['Weekly_Sales'] = ts_data['Weekly_Sales'].interpolate(method='linear')
     
     ts_data.to_csv(PROCESSED_DATA_DIR / "timeseries_data.csv", index=False)
     print(f"Save file in timeseries_data.csv")
