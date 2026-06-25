@@ -12,8 +12,6 @@ def overview_data(df : pd.DataFrame) -> None:
     print(df.duplicated().sum())
     print(f"{'='*40}\n\n")
 
-import pandas as pd
-
 def clean_data(df : pd.DataFrame) -> pd.DataFrame:
     """
     Data Cleaning step-by-step:
